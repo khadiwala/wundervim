@@ -6,6 +6,11 @@ import random
 import string
 import webbrowser
 
+# Silence werkzeug logging
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 
 def oauth_headers():
     return {
@@ -57,6 +62,8 @@ def load_token():
             request.environ.get('werkzeug.server.shutdown')()
         except Exception as e:
             print e
+            return 500, e
+        return "shutdown success"
 
     def killer():
         key_wait.wait()
