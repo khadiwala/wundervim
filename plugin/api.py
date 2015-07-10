@@ -42,6 +42,9 @@ class WunderList(object):
     def create_task(self, list_id, title):
         return self.api_post('tasks', data={'list_id': list_id, 'title': title})
 
+    def update_task(self, task_id, revision, **kwargs):
+        return self.api_patch(os.path.join('tasks', str(task_id)), data=dict(kwargs, revision=revision))
+
     def lists(self, reload=False):
         if reload or 'lists' not in self.cache:
             unsorted_lists = [Struct(**l) for l in self.api_get('lists')]
@@ -70,37 +73,31 @@ class WunderList(object):
             self.cache['folders'] = [Struct(**f) for f in self.api_get('folders')]
         return self.cache['folders']
 
-    def api_get(self, endpoint, params={}, data={}):
-        resp = requests.get(
+    def api_verb(self, verb, endpoint, params, data):
+        resp = verb(
             os.path.join(self.api_base, endpoint),
             headers=dict(self.oauth_headers, **{'Content-Type': 'application/json'}),
             data=json.dumps(data),
             params=params)
         validate(resp)
         return resp.json()
+
+    def api_get(self, endpoint, params={}, data={}):
+        return self.api_verb(requests.get, endpoint, params, data)
 
     def api_put(self, endpoint, params={}, data={}):
-        resp = requests.put(
-            os.path.join(self.api_base, endpoint),
-            headers=dict(self.oauth_headers, **{'Content-Type': 'application/json'}),
-            data=json.dumps(data),
-            params=params)
-        validate(resp)
-        return resp.json()
+        return self.api_verb(requests.put, endpoint, params, data)
 
     def api_post(self, endpoint, params={}, data={}):
-        resp = requests.post(
-            os.path.join(self.api_base, endpoint),
-            headers=dict(self.oauth_headers, **{'Content-Type': 'application/json'}),
-            data=json.dumps(data),
-            params=params)
-        validate(resp)
-        return resp.json()
+        return self.api_verb(requests.post, endpoint, params, data)
+
+    def api_patch(self, endpoint, params={}, data={}):
+        return self.api_verb(requests.patch, endpoint, params, data)
 
     def _by_position(self, to_sort, positions):
         """ Sorts lists or tasks by posisiton list """
         by_id = {item.id: item for item in to_sort}
-        result = list(itertools.repeat(None, len(to_sort)))
+        result = list(itertools.repeat(None, len(to_sort) + len(by_id)))
         for i, item_id in enumerate(positions.values):
             result[i] = by_id.pop(item_id, None)
 

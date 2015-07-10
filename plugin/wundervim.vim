@@ -44,6 +44,7 @@ endfunction
 function! TaskView(line)
 python << endOfPython
 
+set buftype=nofile
 from wundervim import task_view
 line = vim.eval("a:line")
 vim.current.buffer[:] = task_view(get_client(), line)
@@ -72,13 +73,13 @@ endfunction
 
 function! TaskViewSplit()
     let myline=getline('.')
-    split
+    new
     call TaskView(myline)
 endfunction
 
 function! TaskViewSplitVertical()
     let myline=getline('.')
-    vsplit
+    vnew
     call TaskView(myline)
 endfunction
 

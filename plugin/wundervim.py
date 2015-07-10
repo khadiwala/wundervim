@@ -13,7 +13,9 @@ def update_tasks(client, buff):
     for t in new_tasks:
         if t not in by_title:
             client.create_task(lis.id, t)
-
+    for t in by_title.values():
+        if t.title not in new_tasks:
+            client.update_task(t.id, t.revision, completed=True)
     # positions = repeat(None, len(new_tasks))
     # for i,t in enumerate(new_tasks):
     #     if t.title in by_title:
@@ -23,14 +25,15 @@ def update_tasks(client, buff):
 def task_view(client, list_title):
     """
     <List title>
+    <help>
     ==========
-
     <task 1>
     <task 2>
     ...
     """
     list_title = list_title.strip()
-    header = [list_title, '='*len(list_title), '']
+    help_text = 'Delete a line to complete a task, add a line to create one'
+    header = [list_title, help_text, '=' * max(map(len, [list_title, help_text]))]
     lists = client.lists()
     for l in lists:
         if l.title.strip() == list_title:
