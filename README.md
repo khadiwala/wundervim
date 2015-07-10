@@ -1,5 +1,8 @@
 # wundervim
 
+This implements basic task editing functionality for [WunderList](http://wunderlist.com) as a vim plugin. Primarily focused on features I use - if you would like to see something implemented to support your workflow, feel free to file an issue.
+This plugin is highly unstable, please don't let it near any critical data
+
 ## Installation
 
 Use your plugin manager of choice.
@@ -18,5 +21,19 @@ Use your plugin manager of choice.
 
 ## Status
 
-wip
+### Working
+- View folders / lists
+- View uncompleted tasks for a list
+- Add a task
+- Complete a task
 
+### Planned
+- Reordering of tasks
+- Subtasks
+
+### Maybe
+- Due dates / reminders
+- Notes
+- Comments
+- Creating lists / folders
+- Rename a task
