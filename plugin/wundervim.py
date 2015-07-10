@@ -37,7 +37,7 @@ def task_view(client, list_title):
     lists = client.lists()
     for l in lists:
         if l.title.strip() == list_title:
-            return header + [t.title for t in client.tasks(l.id, reload=True)]
+            return header + list(chain.from_iterable([t.title] + ['  ' + st.title for st in client.subtasks(t.id)] for t in client.tasks(l.id, reload=True)))
     return ["Specified list ({}) not found - possibly deleted?".format(list_title)]
 
 

@@ -45,6 +45,13 @@ class WunderList(object):
     def update_task(self, task_id, revision, **kwargs):
         return self.api_patch(os.path.join('tasks', str(task_id)), data=dict(kwargs, revision=revision))
 
+    def subtasks(self, task_id, reload=False):
+        if 'subtasks' not in self.cache:
+            self.cache['subtasks'] = {}
+        if reload or task_id not in self.cache['subtasks']:
+            self.cache['subtasks'][task_id] = [Struct(**st) for st in self.api_get('subtasks', params={'task_id': task_id})]
+        return self.cache['subtasks'][task_id]
+
     def lists(self, reload=False):
         if reload or 'lists' not in self.cache:
             unsorted_lists = [Struct(**l) for l in self.api_get('lists')]
