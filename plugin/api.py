@@ -32,7 +32,7 @@ class WunderList(object):
         self.oauth_headers = oauth_headers
         self.cache = {}
 
-    def tasks(self, list_id, reload=False):
+    def tasks(self, list_id, reload=True):
         if 'tasks' not in self.cache:
             self.cache['tasks'] = {}
         if reload or list_id not in self.cache['tasks']:
@@ -40,26 +40,35 @@ class WunderList(object):
         return self.cache['tasks'][list_id]
 
     def create_task(self, list_id, title):
-        return self.api_post('tasks', data={'list_id': list_id, 'title': title})
+        res = self.api_post('tasks', data={'list_id': list_id, 'title': title})
+        return Struct(**res)
 
     def update_task(self, task_id, revision, **kwargs):
-        return self.api_patch(os.path.join('tasks', str(task_id)), data=dict(kwargs, revision=revision))
+        return Struct(**self.api_patch(os.path.join('tasks', str(task_id)), data=dict(kwargs, revision=revision))[0])
 
-    def subtasks(self, task_id, reload=False):
+    def subtasks(self, task_id, reload=True):
         if 'subtasks' not in self.cache:
             self.cache['subtasks'] = {}
         if reload or task_id not in self.cache['subtasks']:
-            self.cache['subtasks'][task_id] = [Struct(**st) for st in self.api_get('subtasks', params={'task_id': task_id})]
+            self.cache['subtasks'][task_id] = filter(
+                lambda st: not st.completed,  # wunderlist api is broken
+                [Struct(**st) for st in self.api_get('subtasks', params={'task_id': task_id, 'completed': False})])
         return self.cache['subtasks'][task_id]
 
-    def lists(self, reload=False):
+    def create_subtask(self, task_id, title):
+        return Struct(**self.api_post('subtasks', data={'task_id': task_id, 'title': title}))
+
+    def update_subtask(self, subtask_id, revision, **kwargs):
+        return Struct(**self.api_patch(os.path.join('subtasks', str(subtask_id)), data=dict(kwargs, revision=revision))[0])
+
+    def lists(self, reload=True):
         if reload or 'lists' not in self.cache:
             unsorted_lists = [Struct(**l) for l in self.api_get('lists')]
             position = self.list_positions()
             self.cache['lists'] = self._by_position(unsorted_lists, position)
         return self.cache['lists']
 
-    def list(self, ident, reload=False):
+    def list(self, ident, reload=True):
         if 'lists' not in self.cache:
             self.cache['lists'] = []
         if reload or ident not in map(self.cache['lists'], api_id):
@@ -75,7 +84,7 @@ class WunderList(object):
     def list_positions(self):
         return [Struct(**pos) for pos in self.api_get('list_positions')][0]
 
-    def folders(self, reload=False):
+    def folders(self, reload=True):
         if reload or 'folders' not in self.cache:
             self.cache['folders'] = [Struct(**f) for f in self.api_get('folders')]
         return self.cache['folders']
