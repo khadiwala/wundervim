@@ -26,10 +26,10 @@ Use your plugin manager of choice.
 - View uncompleted tasks for a list
 - Add a task
 - Complete a task
+- Subtasks
 
 ### Planned
 - Reordering of tasks
-- Subtasks
 
 ### Maybe
 - Due dates / reminders
