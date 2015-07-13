@@ -40,7 +40,7 @@ def test_task_view():
         'tasks': lambda s, id, **_: {0: map(mock_api_object, list1_tasks)}[id],
         'subtasks': constant([])
     })
-    assert wv.task_view(client, lists[0])[3:] == map(wv.format_task, list1_tasks)
+    assert wv.task_view(client, lists[0])[len(wv.task_header(lists[0])):] == map(wv.format_task, list1_tasks)
 
 
 def test_task_creation():

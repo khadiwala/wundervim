@@ -6,6 +6,79 @@ TASK_SYMBOL = '*'
 SUBTASK_SYMBOL = '-'
 
 
+def format_task(s):
+    return TASK_SYMBOL + ' ' + s
+
+
+def format_subtask(s):
+    return INDENT + SUBTASK_SYMBOL + ' ' + s
+
+
+def deformat_task(s):
+    return s.replace(TASK_SYMBOL, '', 1).strip()
+
+
+def deformat_subtask(s):
+    return s.replace(SUBTASK_SYMBOL, '', 1).strip()
+
+
+def task_header(list_title):
+    """
+    <List title>
+
+    <help>
+    ==========
+    """
+    header = [
+        list_title,
+        '',
+        'Delete a line to complete a task, add a line to create one',
+        '{} For regular tasks'.format(TASK_SYMBOL),
+        '{}{} For subtasks'.format(INDENT, SUBTASK_SYMBOL)
+    ]
+    return header + ['=' * max(map(len, header))]
+
+
+def wunder_view(client):
+    """
+    <Folder 1>
+      <List 1>
+      <List 2>
+    <List 3>
+    """
+    folders = client.folders()
+    folders_by_id = {f.id: f for f in folders}
+    lists_by_folder = dict(chain(*[zip(f.list_ids, repeat(f.id)) for f in folders]))
+    by_fid = groupby(client.lists(reload=True), lambda k: lists_by_folder.get(k.id, None))
+
+    res = []
+    for k, v in by_fid:
+        prefix = ""
+        if k is not None:
+            res.append(folders_by_id[k].title)
+            prefix += INDENT
+        for lis in v:
+            res.append(prefix + lis.title)
+    return res
+
+
+def task_view(client, list_title):
+    """
+    <task header>
+    * <task 1>
+    * <task 2>
+      - <subtask 2-1>
+    ...
+    """
+    list_title = list_title.strip()
+    lists = client.lists()
+    for l in lists:
+        if l.title.strip() == list_title:
+            return task_header(list_title) + list(chain.from_iterable(
+                [format_task(t.title)] + [format_subtask(st.title) for st in client.subtasks(t.id)] for t in client.tasks(l.id, reload=True)))
+    return ["Specified list ({}) not found - possibly deleted?".format(list_title)]
+
+
 def update_tasks(client, buff):
     list_title, lines = buff[0].strip(), buff[len(task_header("")):]
     assert lines[0].strip().startswith(TASK_SYMBOL), "New todo list must start with a task (*)"
@@ -56,70 +129,3 @@ def update_tasks(client, buff):
         isgone = lambda k: k.title not in new_st_by_id.get(oid, [])
         for a in filter(isgone, osts):
             client.update_subtask(a.id, a.revision, completed=True)
-
-
-def format_task(s):
-    return TASK_SYMBOL + ' ' + s
-
-
-def format_subtask(s):
-    return INDENT + SUBTASK_SYMBOL + ' ' + s
-
-
-def deformat_task(s):
-    return s.replace(TASK_SYMBOL, '', 1).strip()
-
-
-def deformat_subtask(s):
-    return s.replace(SUBTASK_SYMBOL, '', 1).strip()
-
-
-def task_view(client, list_title):
-    """
-    <List title>
-    <help>
-    ==========
-    <task 1>
-    <task 2>
-    ...
-    """
-    list_title = list_title.strip()
-    lists = client.lists()
-    for l in lists:
-        if l.title.strip() == list_title:
-            return task_header(list_title) + list(chain.from_iterable(
-                [format_task(t.title)] + [format_subtask(st.title) for st in client.subtasks(t.id)] for t in client.tasks(l.id, reload=True)))
-    return ["Specified list ({}) not found - possibly deleted?".format(list_title)]
-
-
-def task_header(list_title):
-    """
-    <List title>
-    <help>
-    ==========
-    """
-    help_text = 'Delete a line to complete a task, add a line to create one'
-    return [list_title, help_text, '=' * max(map(len, [list_title, help_text]))]
-
-
-def wunder_view(client):
-    """
-    <Folder 1>
-      <List 1>
-      <List 2>
-    <List 3>
-    """
-    folders = client.folders()
-    folders_by_id = {f.id: f for f in folders}
-    lists_by_folder = dict(chain(*[zip(f.list_ids, repeat(f.id)) for f in folders]))
-    by_fid = groupby(client.lists(reload=True), lambda k: lists_by_folder.get(k.id, None))
-
-    res = []
-    for k, v in by_fid:
-        prefix = ""
-        if k is not None:
-            res.append(folders_by_id[k].title)
-            prefix += INDENT
-        for lis in v:
-            res.append(prefix + lis.title)
-    return res

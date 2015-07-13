@@ -29,7 +29,6 @@ endfunction
 
 function! WunderView()
 30vnew
-file wundervim
 set buftype=nofile
 noremap <buffer> <CR> :WunderTaskViewPrevWindow<CR>
 noremap <buffer> o :WunderTaskViewPrevWindow<CR>
@@ -43,6 +42,7 @@ from wundervim import wunder_view
 vim.current.buffer[:] = wunder_view(get_client())
 
 endOfPython
+file wundervim
 endfunction
 
 
