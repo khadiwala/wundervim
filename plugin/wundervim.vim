@@ -12,10 +12,24 @@ endOfPython
 " --------------------------------
 "  Function(s)
 " --------------------------------
+"
+
+let g:wv_open = 0
+
+function! WunderViewToggle()
+    if g:wv_open
+        bd wundervim
+        let g:wv_open = 0
+    else
+        call WunderView()
+        let g:wv_open = 1
+    endif
+endfunction
 
 
 function! WunderView()
 30vnew
+file wundervim
 set buftype=nofile
 noremap <buffer> <CR> :WunderTaskViewPrevWindow<CR>
 noremap <buffer> o :WunderTaskViewPrevWindow<CR>
@@ -103,7 +117,7 @@ endfunction
 " --------------------------------
 "  Expose our commands to the user
 " --------------------------------
-command! WunderView call WunderView()
+command! WunderView call WunderViewToggle()
 command! WunderTaskView call TaskView()
 command! WunderTaskViewPrevWindow call TaskViewPrevWindow()
 command! WunderTaskViewCurrentWindow call TaskViewCurrentWindow()
