@@ -46,6 +46,7 @@ function! WunderView()
 30vnew
 set buftype=nofile
 set nonumber
+set cursorline
 noremap <buffer> <CR> :WunderTaskViewPrevWindow<CR>
 noremap <buffer> o :WunderTaskViewPrevWindow<CR>
 noremap <buffer> t :WunderTaskViewNewTab<CR>
