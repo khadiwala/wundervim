@@ -5,6 +5,15 @@ INDENT = ' ' * 2
 TASK_SYMBOL = '*'
 SUBTASK_SYMBOL = '-'
 
+LIST_HELP = '''
+" Wundervim help
+" ==============
+" Enter - open in prev window
+" o - open in prev window
+" t - open in new tab
+" T - open in new tab silently
+" i - open split
+" s - open vsplit'''
 
 def format_task(s):
     return TASK_SYMBOL + ' ' + s
@@ -39,19 +48,23 @@ def task_header(list_title):
     return header + ['=' * max(map(len, header))]
 
 
-def wunder_view(client):
+def wunder_view(client, include_help=False):
     """
     <Folder 1>
       <List 1>
       <List 2>
     <List 3>
     """
-    folders = client.folders()
+    folders = client.folders(reload=False)
     folders_by_id = {f.id: f for f in folders}
     lists_by_folder = dict(chain(*[zip(f.list_ids, repeat(f.id)) for f in folders]))
-    by_fid = groupby(client.lists(reload=True), lambda k: lists_by_folder.get(k.id, None))
+    by_fid = groupby(client.lists(reload=False), lambda k: lists_by_folder.get(k.id, None))
 
     res = []
+    if include_help:
+        res.extend(LIST_HELP.split('\n'))
+    else:
+        res.extend(['" Press ? for help', ''])
     for k, v in by_fid:
         prefix = ""
         if k is not None:

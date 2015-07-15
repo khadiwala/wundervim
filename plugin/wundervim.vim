@@ -26,16 +26,33 @@ function! WunderViewToggle()
     endif
 endfunction
 
+let g:help_open = 0
+function! HelpToggle()
+python << endOfPython
+from wundervim import wunder_view
+help_open = int(vim.eval("g:help_open"))
+include_help = False if help_open == 1 else True
+vim.current.buffer[:] = wunder_view(get_client(), include_help=include_help)
+endOfPython
+if g:help_open
+    let g:help_open = 0
+else
+    let g:help_open = 1
+endif
+endfunction
+
 
 function! WunderView()
 30vnew
 set buftype=nofile
+set nonumber
 noremap <buffer> <CR> :WunderTaskViewPrevWindow<CR>
 noremap <buffer> o :WunderTaskViewPrevWindow<CR>
 noremap <buffer> t :WunderTaskViewNewTab<CR>
 noremap <buffer> T :WunderTaskViewNewTabSilent<CR>
 noremap <buffer> i :WunderTaskViewSplit<CR>
 noremap <buffer> s :WunderTaskViewSplitVertical<CR>
+noremap <buffer> ? :call HelpToggle()<CR>
 python << endOfPython
 
 from wundervim import wunder_view
@@ -58,6 +75,7 @@ endfunction
 function! TaskView(line)
 
 set buftype=nofile
+set nonumber
 python << endOfPython
 
 from wundervim import task_view

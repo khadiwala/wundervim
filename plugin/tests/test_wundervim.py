@@ -17,19 +17,21 @@ def constant(res):
 def mock_api_object(title, id=None, additional={}):
     return Struct(**dict(additional, id=(random.randint(0, 1000) if id is None else id), title=title))
 
+def wv_comment(l):
+    return l and not l.startswith('"')
 
 def test_list_view():
-    assert wv.wunder_view(mock_client({
+    assert filter(wv_comment, wv.wunder_view(mock_client({
         'folders': constant([]),
         'lists': constant(map(mock_api_object, "These are test lists".split()))
-        })) == "These are test lists".split()
+        }))) == "These are test lists".split()
 
 
 def test_with_folders():
-    assert wv.wunder_view(mock_client({
+    assert filter(wv_comment, wv.wunder_view(mock_client({
         'folders': constant([mock_api_object("my_folder", additional={'list_ids': [1, 2]})]),
         'lists': constant(mock_api_object(l, id=i) for i, l in enumerate("These are test lists".split()))
-        })) == ["These", "my_folder", "  are", "  test", "lists"]
+        }))) == ["These", "my_folder", "  are", "  test", "lists"]
 
 
 def test_task_view():
