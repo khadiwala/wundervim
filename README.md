@@ -19,6 +19,17 @@ Use your plugin manager of choice.
   - Add `Plug 'https://github.com/khadiwala/wundervim'` to .vimrc
   - Run `:PlugInstall`
 
+Primarily, the commands you can use to interact with Wunderlist are
+:WunderView, which shows your lists and folders
+:WunderTaskUpdate, which will send your local changes to Wunderlist
+
+You can set mappings for these in your vimrc, for example:
+
+" Toggle wunderlist pane
+map <leader>w :WunderView<CR>
+" Persist task updates to WunderList
+map <leader>u :WunderTaskUpdate<CR>
+
 ## Status
 
 ### Working
