@@ -44,7 +44,7 @@ class WunderList(object):
         return Struct(**res)
 
     def update_task(self, task_id, revision, **kwargs):
-        return Struct(**self.api_patch(os.path.join('tasks', str(task_id)), data=dict(kwargs, revision=revision))[0])
+        return Struct(**self.api_patch(os.path.join('tasks', str(task_id)), data=dict(kwargs, revision=revision)))
 
     def subtasks(self, task_id, reload=True):
         if 'subtasks' not in self.cache:
@@ -59,7 +59,7 @@ class WunderList(object):
         return Struct(**self.api_post('subtasks', data={'task_id': task_id, 'title': title}))
 
     def update_subtask(self, subtask_id, revision, **kwargs):
-        return Struct(**self.api_patch(os.path.join('subtasks', str(subtask_id)), data=dict(kwargs, revision=revision))[0])
+        return Struct(**self.api_patch(os.path.join('subtasks', str(subtask_id)), data=dict(kwargs, revision=revision)))
 
     def lists(self, reload=True):
         if reload or 'lists' not in self.cache:
